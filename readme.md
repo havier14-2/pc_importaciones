@@ -37,7 +37,7 @@ Para simplificar el despliegue inicial, el proyecto cuenta con un entorno prepar
 
 La forma más rápida de inicializar el entorno por primera vez sin usar comandos manuales es a través del archivo interactivo de presentación.
 
-1. Abre tu editor de código (por ejemplo, VS Code) y carga el archivo `presentacion_etl.ipynb`.  
+1. Abre tu editor de código (por ejemplo, VS Code) y carga el archivo `note_etl.ipynb`.  
 2. Asegúrate de tener XAMPP y MySQL activos.  
 3. Ejecuta la **Fase 0** (las primeras celdas del Notebook). Esto ejecutará automáticamente los scripts en segundo plano para:
    - Crear la base de datos `retail_fx_db` en tu MySQL local.
