@@ -89,17 +89,8 @@ Para ejecutar el pipeline automáticamente todas las mañanas:
 Desde ese momento, Windows ejecutará automáticamente el script según el horario definido, manteniendo actualizado el Data Warehouse y permitiendo que el Dashboard en Dash refleje alertas críticas de riesgo cambiario en tiempo real.
 
 
-### Test API
+### EJECUTAR PROYECTO
 
-Para probar la API:
-
-1. Instalar el servidor ASGI (uvicorn):
-`pip install fastapi uvicorn pydantic`
-
-2. Iniciar el servicio: Abre la terminal en la raíz de tu proyecto y ejecuta:
-`uvicorn api.main:app --reload --port 8000`
-
-3. Acceder a la Interfaz Gráfica de Pruebas (Swagger UI): Abre tu navegador e ingresa a:
-`http://127.0.0.1:8000/docs`
-
-Desde ahí podrás desplegar el endpoint /predict/risk, presionar "Try it out", modificar el JSON de prueba y verificar las predicciones automáticas que genera tu modelo.
+1. Abrir xampp y activar MySQL en el puerto 3306
+2. Instalar dependencias: `pip install -r requirements.txt`
+3. Ejecutar: `.\lanzar_proyecto.ps1`
