@@ -8,7 +8,7 @@ echo =======================================================================
 
 :: 1. Posicionamiento de ruta portátil
 cd /d "%~dp0"
-logger.info "Ruta de trabajo establecida en: %cd%"
+echo [*] Ruta de trabajo establecida en: %cd%
 
 :: 2. Verificación e Instalación de Dependencias Obligatorias
 echo [*] Fase 1: Validando dependencias del sistema (requirements.txt)...
@@ -24,7 +24,7 @@ echo [OK] Dependencias alineadas con éxito.
 echo [*] Fase 2: Ejecutando Suite de Pruebas Unitarias Automatizadas (CI)...
 python -m unittest discover -s tests -p "test_*.py"
 if %errorlevel% neq 0 (
-    echo [CRITICO] Las pruebas unitarias fallaron. Pipeline abortado para proteger el DW.
+    echo [CRITICO] Las pruebas unitarias o de API fallaron. Pipeline abortado para proteger el DW.
     pause
     exit /b %errorlevel%
 )
@@ -40,7 +40,7 @@ if %errorlevel% neq 0 (
 )
 
 :: 5. Entrenamiento del Portafolio de Modelos de Machine Learning
-echo [*] Fase 4: Re-entrenando modelos de Machine Learning (Supervisado y No Supervisado)...
+echo [*] Fase 4: Re-entrenando modelos de Machine Learning (Regresión del Costo)...
 python models/train.py
 if %errorlevel% neq 0 (
     echo [ERROR] El re-entrenamiento de los modelos de Machine Learning falló.
@@ -49,7 +49,7 @@ if %errorlevel% neq 0 (
 )
 
 echo =======================================================================
-echo    [EXITO] ¡Ecosistema Actualizado y Validado de Extremo a Extremo!
-echo    Los datos del DW están frescos y los modelos (.pkl) optimizados.
+echo     [EXITO] Ecosistema Actualizado y Validado de Extremo a Extremo
+echo     Los datos del DW están frescos y los modelos (.pkl) optimizados.
 echo =======================================================================
 pause

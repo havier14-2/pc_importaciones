@@ -20,149 +20,204 @@ engine = create_engine(f'mysql+pymysql://{db_user}:{db_pass}@{db_host}/{db_name}
 app = Dash(__name__)
 app.title = "Retail Tech FX - Panel de Control Financiero"
 
-# Diseño de la Interfaz del Dashboard (Layout)
-app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px', 'backgroundColor': '#f4f6f9'}, children=[
+# Diseño de la Interfaz del Dashboard (Layout Mejorado y Espaciado)
+app.layout = html.Div(style={'fontFamily': 'Segoe UI, Arial, sans-serif', 'padding': '25px', 'backgroundColor': '#f8fafc', 'minHeight': '100vh'}, children=[
     
-    # Encabezado Corporativo
-    html.Div(style={'backgroundColor': '#1e3a8a', 'color': 'white', 'padding': '20px', 'borderRadius': '8px', 'marginBottom': '20px'}, children=[
-        html.H1("Retail Tech FX: Sistema Analítico y Preventivo de Riesgo Cambiario", style={'margin': '0', 'fontSize': '26px'}),
-        html.P("Monitoreo de Márgenes Comerciales frente a fluctuaciones de la divisa USD/CLP (EFT)", style={'margin': '5px 0 0 0', 'opacity': '0.9'})
+    # Encabezado Corporativo Moderno
+    html.Div(style={'backgroundColor': '#1e3a8a', 'color': 'white', 'padding': '25px', 'borderRadius': '12px', 'marginBottom': '25px', 'boxShadow': '0 4px 6px rgba(0,0,0,0.05)'}, children=[
+        html.H1("Retail Tech FX: Panel de Riesgo Cambiario", style={'margin': '0', 'fontSize': '28px', 'fontWeight': '600'}),
+        html.P("Monitoreo de Costos de Internación frente a fluctuaciones de la divisa USD/CLP (EFT)", style={'margin': '8px 0 0 0', 'opacity': '0.85', 'fontSize': '15px'})
     ]),
     
-    # Fila de Filtros y Control Histórico
-    html.Div(style={'display': 'flex', 'gap': '20px', 'marginBottom': '20px'}, children=[
-        html.Div(style={'flex': '1', 'backgroundColor': 'white', 'padding': '15px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}, children=[
-            html.H3("Filtro de Producto Histórico", style={'marginTop': '0', 'color': '#333'}),
+    # Contenedor Superior: Filtro Histórico (Izquierda) y Simulador IA (Derecha)
+    html.Div(style={'display': 'flex', 'gap': '25px', 'marginBottom': '25px', 'flexWrap': 'wrap'}, children=[
+        
+        # Panel Filtro Histórico
+        html.Div(style={'flex': '1', 'minWidth': '300px', 'backgroundColor': 'white', 'padding': '20px', 'borderRadius': '12px', 'boxShadow': '0 4px 6px rgba(0,0,0,0.05)', 'borderTop': '4px solid #1e3a8a'}, children=[
+            html.H3("🔍 Filtro de Histórico", style={'marginTop': '0', 'color': '#1e293b', 'fontSize': '18px', 'marginBottom': '15px'}),
+            html.Label("Seleccionar Producto:", style={'fontWeight': '500', 'color': '#64748b', 'marginBottom': '8px', 'display': 'block'}),
             dcc.Dropdown(
                 id='selector-producto',
-                options=[{'label': 'Todos los Productos', 'value': 'ALL'}] + 
-                        [{'label': p, 'value': p} for p in ['MacBook Pro M3', 'iPhone 15 Pro', 'Monitor Dell 4K']],
+                options=[{'label': 'Todos los Productos', 'value': 'ALL'}],
                 value='ALL',
                 clearable=False
             )
         ]),
         
-        # Módulo del Simulador de Negocio con Inteligencia Artificial (Llama a la API)
-        html.Div(style={'flex': '2', 'backgroundColor': 'white', 'padding': '15px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)', 'borderLeft': '5px solid #10b981'}, children=[
-            html.H3("🔮 Simulador de Riesgo Cambiario en Tiempo Real (Inferencia via API REST)", style={'marginTop': '0', 'color': '#065f46'}),
-            html.Div(style={'display': 'flex', 'gap': '15px', 'flexWrap': 'wrap'}, children=[
+        # Módulo del Simulador de Negocio con IA (Diseño Vertical Ampliado para evitar solapamiento)
+        html.Div(style={'flex': '2', 'minWidth': '500px', 'backgroundColor': 'white', 'padding': '20px', 'borderRadius': '12px', 'boxShadow': '0 4px 6px rgba(0,0,0,0.05)', 'borderLeft': '5px solid #10b981'}, children=[
+            html.H3("🔮 Simulador de Costos en Tiempo Real (Inferencia ML)", style={'marginTop': '0', 'color': '#065f46', 'fontSize': '18px', 'marginBottom': '20px'}),
+            
+            # Inputs bien distribuidos de forma vertical/bloque
+            html.Div(style={'display': 'flex', 'flexDirection': 'column', 'gap': '20px'}, children=[
                 html.Div([
-                    html.Label("Producto a Evaluar:"),
-                    dcc.Dropdown(id='sim-producto', options=[{'label': p, 'value': p} for p in ['MacBook Pro M3', 'iPhone 15 Pro', 'Monitor Dell 4K']], value='MacBook Pro M3', clearable=False, style={'width': '180px'})
+                    html.Label("Producto a Evaluar en Escenario Cambiario:", style={'fontWeight': '600', 'color': '#334155', 'display': 'block', 'marginBottom': '8px'}),
+                    dcc.Dropdown(id='sim-producto', options=[], value='', clearable=False, style={'width': '100%'})
                 ]),
                 html.Div([
-                    html.Label("Región Bodega:"),
-                    dcc.Dropdown(id='sim-region', options=[{'label': r, 'value': r} for r in ['Metropolitana', 'Valparaíso', 'Biobío']], value='Metropolitana', clearable=False, style={'width': '180px'})
-                ]),
-                html.Div([
-                    html.Label("Dólar Proyectado ($):"),
-                    dcc.Slider(id='sim-dolar', min=800, max=1100, step=10, value=960, marks={i: f"${i}" for i in range(800, 1101, 100)})
+                    html.Label("Definir Valor del Dólar Proyectado ($ CLP):", style={'fontWeight': '600', 'color': '#334155', 'display': 'block', 'marginBottom': '15px'}),
+                    html.Div(style={'padding': '0 15px'}, children=[
+                        dcc.Slider(
+                            id='sim-dolar', 
+                            min=800, 
+                            max=1100, 
+                            step=10, 
+                            value=950, 
+                            marks={i: {'label': f"${i}", 'style': {'color': '#475569', 'fontSize': '12px'}} for i in range(800, 1101, 50)}
+                        )
+                    ])
                 ]),
             ]),
-            html.Div(id='resultado-simulacion-api', style={'marginTop': '15px', 'padding': '10px', 'borderRadius': '6px', 'fontWeight': 'bold'})
+            
+            # Caja de Respuesta de la Inferencia
+            html.Div(id='resultado-simulacion-api', style={'marginTop': '25px', 'transition': 'all 0.3s ease'})
         ])
     ]),
     
-    # Fila de Gráficos Analíticos
-    html.Div(style={'display': 'flex', 'gap': '20px'}, children=[
-        html.Div(style={'flex': '1', 'backgroundColor': 'white', 'padding': '15px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}, children=[
-            html.H4("Evolución Temporal de Márgenes y Cotización del Dólar", style={'marginTop': '0'}),
+    # Fila Inferior: Gráficos Analíticos de Pantalla Completa
+    html.Div(style={'display': 'flex', 'gap': '25px', 'flexWrap': 'wrap'}, children=[
+        html.Div(style={'flex': '1', 'minWidth': '450px', 'backgroundColor': 'white', 'padding': '20px', 'borderRadius': '12px', 'boxShadow': '0 4px 6px rgba(0,0,0,0.05)'}, children=[
             dcc.Graph(id='grafico-tendencia')
         ]),
-        html.Div(style={'flex': '1', 'backgroundColor': 'white', 'padding': '15px', 'borderRadius': '8px', 'boxShadow': '0 2px 4px rgba(0,0,0,0.1)'}, children=[
-            html.H4("Distribución de Alertas en el Tiempo", style={'marginTop': '0'}),
+        html.Div(style={'flex': '1', 'minWidth': '450px', 'backgroundColor': 'white', 'padding': '20px', 'borderRadius': '12px', 'boxShadow': '0 4px 6px rgba(0,0,0,0.05)'}, children=[
             dcc.Graph(id='grafico-alertas')
         ])
     ])
 ])
 
 # ---------------------------------------------------------
-# CALLBACK 1: Actualizar Gráficos Históricos desde el Data Warehouse
+# CALLBACK 1: Carga Dinámica de Opciones y Gráficos Históricos Legibles
 # ---------------------------------------------------------
 @app.callback(
-    [Output('grafico-tendencia', 'figure'),
+    [Output('selector-producto', 'options'),
+     Output('sim-producto', 'options'),
+     Output('sim-producto', 'value'),
+     Output('grafico-tendencia', 'figure'),
      Output('grafico-alertas', 'figure')],
-    [Input('selector-producto', 'value')]
+    [Input('selector-producto', 'value')],
+    [State('sim-producto', 'value')]
 )
-def actualizar_graficos_historicos(producto_seleccionado):
-    # Leer datos frescos del DW MySQL
+def actualizar_panel_y_opciones(producto_seleccionado, producto_sim_actual):
     df = pd.read_sql("SELECT * FROM dw_riesgo_fx", engine)
     
-    if producto_seleccionado != 'ALL':
-        df = df[df['producto'] == producto_seleccionado]
+    if df.empty:
+        fig_vacia = px.line(title="Sin datos disponibles en dw_riesgo_fx")
+        return [{'label': 'Todos', 'value': 'ALL'}], [], '', fig_vacia, fig_vacia
+
+    # Asegurar que la fecha sea un formato de tiempo correcto para Plotly
+    df['fecha'] = pd.to_datetime(df['fecha'])
+
+    productos_unicos = sorted(df['producto'].unique())
+    opciones_dropdown = [{'label': 'Todos los Productos', 'value': 'ALL'}] + [{'label': p, 'value': p} for p in productos_unicos]
+    opciones_simulador = [{'label': p, 'value': p} for p in productos_unicos]
     
-    # Gráfico 1: Tendencia Temporal del Margen
-    fig_tendencia = px.line(
-        df, x='fecha', y='margen_actual_pct', color='producto',
-        title="Fluctuación del Margen Porcentual Real por Fecha",
-        labels={'margen_actual_pct': 'Margen Real (%)', 'fecha': 'Fecha de Cotización'},
-        template='plotly_white'
-    )
-    fig_tendencia.add_hline(y=0, line_dash="dash", line_color="red", annotation_text="Pérdida Económica")
+    val_sim_defecto = producto_sim_actual if producto_sim_actual in productos_unicos else productos_unicos[0]
+
+    if producto_seleccionado == 'ALL':
+        # ESTRATEGIA DE CLARIDAD: Si son todos los productos, agrupamos por mes y mostramos el promedio ponderado
+        df_resumido = df.groupby([df['fecha'].dt.to_period('M'), 'producto'])['costo_internacion_clp'].mean().reset_index()
+        df_resumido['fecha'] = df_resumido['fecha'].dt.to_timestamp()
+        
+        fig_tendencia = px.scatter(
+            df_resumido, x='fecha', y='costo_internacion_clp', color='producto',
+            title="Costo de Internación Promedio Mensual por Producto (Vista Global)",
+            labels={'costo_internacion_clp': 'Costo Promedio ($ CLP)', 'fecha': 'Mes de Operación'},
+            template='plotly_white'
+        )
+        fig_tendencia.update_traces(marker=dict(size=10, opacity=0.7))
+    else:
+        # Si selecciona uno solo, mostramos su línea temporal exacta paso a paso
+        df_filtrado = df[df['producto'] == producto_seleccionado].sort_values('fecha')
+        fig_tendencia = px.line(
+            df_filtrado, x='fecha', y='costo_internacion_clp',
+            title=f"Línea de Tiempo Analítica: {producto_seleccionado}",
+            labels={'costo_internacion_clp': 'Costo Internación ($ CLP)', 'fecha': 'Fecha de Importación'},
+            template='plotly_white',
+            line_shape='spline'
+        )
+        fig_tendencia.update_traces(line_color='#1e3a8a', line_width=2.5)
     
-    # Gráfico 2: Alertas de Margen Sanos vs Alertas Rojas
+    # Agregar el techo presupuestario común de forma clara
+    fig_tendencia.add_hline(y=800000, line_dash="dash", line_color="#ef4444", annotation_text="Techo Presupuestario ($800K CLP)", annotation_position="top left")
+    fig_tendencia.update_layout(margin={'t': 50, 'b': 40, 'l': 50, 'r': 40}, hovermode="x unified")
+    
+    # Gráfico 2: Frecuencia de Alertas
+    df_alertas = df if producto_seleccionado == 'ALL' else df[df['producto'] == producto_seleccionado]
     fig_alertas = px.histogram(
-        df, x='producto', color='estado_riesgo', barmode='group',
-        title="Conteo Histórico de Alertas de Margen",
-        color_discrete_map={'OK (Margen Sano)': '#10b981', 'ALERTA ROJA (Pérdida/Bajo Margen)': '#ef4444'},
+        df_alertas, x='producto', color='estado_riesgo', barmode='group',
+        title="Clasificación Agrupada de Operaciones por Umbral de Alerta",
+        labels={'producto': 'Producto Analizado', 'count': 'N° de Transacciones'},
+        color_discrete_map={'OPERACIÓN OPTIMIZADA': '#10b981', 'ALERTA ROJA (Sobrecosto Predictivo)': '#ef4444'},
         template='plotly_white'
     )
+    fig_alertas.update_layout(margin={'t': 50, 'b': 40, 'l': 40, 'r': 40}, xaxis_tickangle=-30)
     
-    return fig_tendencia, fig_alertas
+    return opciones_dropdown, opciones_simulador, val_sim_defecto, fig_tendencia, fig_alertas
 
 # ---------------------------------------------------------
-# CALLBACK 2: Integración en Tiempo Real con la API REST (Inferencia de ML)
+# CALLBACK 2: Integración en Tiempo Real con FastAPI (Modelo de Regresión)
 # ---------------------------------------------------------
 @app.callback(
-    Output('resultado-simulacion-api', 'children'),
-    Output('resultado-simulacion-api', 'style'),
+    [Output('resultado-simulacion-api', 'children'),
+     Output('resultado-simulacion-api', 'style')],
     [Input('sim-producto', 'value'),
-     Input('sim-region', 'value'),
      Input('sim-dolar', 'value')]
 )
-def consultar_api_predictiva(producto, region, valor_dolar):
-    # Datos por defecto operacionales simulados para enviar a la API
-    stock_falso = 45 if "MacBook" in producto else (120 if "iPhone" in producto else 30)
-    costo_falso = 1500.0 if "MacBook" in producto else (999.0 if "iPhone" in producto else 400.0)
+def consultar_api_predictiva(producto, valor_dolar):
+    if not producto:
+        return "Seleccione un producto válido para comenzar la simulación cambiaria.", {
+            'color': '#475569', 'backgroundColor': '#f1f5f9', 'padding': '12px', 'borderRadius': '8px', 'border': '1px solid #cbd5e1'
+        }
+
+    # FIX CRÍTICO: Envío de parámetros como tupla válida (producto,) para evitar el error de SQLAlchemy/Pandas
+    query = "SELECT categoria, cantidad_unidades, precio_fob_usd, arancel_aduanero_pct FROM dw_riesgo_fx WHERE producto = %s LIMIT 1"
+    df_base = pd.read_sql(query, engine, params=(producto,))
     
+    if df_base.empty:
+        categoria, cantidad, precio, arancel = "General", 1, 100.0, 6.0
+    else:
+        categoria = df_base.iloc[0]['categoria']
+        cantidad = int(df_base.iloc[0]['cantidad_unidades'])
+        precio = float(df_base.iloc[0]['precio_fob_usd'])
+        arancel = float(df_base.iloc[0]['arancel_aduanero_pct'])
+
     payload = {
         "producto": producto,
-        "region_cl": region,
-        "stock_unidades": stock_falso,
-        "costo_usd": costo_falso,
-        "valor_dolar": float(valor_dolar)
+        "categoria": categoria,
+        "cantidad_unidades": cantidad,
+        "precio_fob_usd": precio,
+        "valor_dolar": float(valor_dolar),
+        "arancel_aduanero_pct": arancel
     }
     
     try:
-        # Petición HTTP POST dirigida a la API REST de FastAPI (Puerto 8000)
         url_api = "http://127.0.0.1:8000/predict/risk"
         respuesta = requests.post(url_api, json=payload, timeout=3)
         
         if respuesta.status_code == 200:
             datos_api = respuesta.json()
-            alerta_activa = datos_api["alerta_roja_proyectada"]
-            probabilidad = datos_api["probabilidad_riesgo_pct"]
+            sobrecosto_activo = datos_api["alerta_sobrecosto"]
             mensaje = datos_api["mensaje_negocio"]
             
-            # Estilos dinámicos según el dictamen del modelo de ML
-            if alerta_activa:
-                color_fondo = '#fee2e2'
-                color_texto = '#991b1b'
-                borde = '1px solid #f87171'
-                texto_salida = f"❌ {mensaje} (Probabilidad de Alerta: {probabilidad}%)"
+            if sobrecosto_activo:
+                color_fondo, color_texto, borde, icono = '#fef2f2', '#991b1b', '1px solid #f87171', "❌ "
             else:
-                color_fondo = '#d1fae5'
-                color_texto = '#065f46'
-                borde = '1px solid #34d399'
-                texto_salida = f"✅ {mensaje} (Probabilidad de Alerta: {probabilidad}%)"
+                color_fondo, color_texto, borde, icono = '#ecfdf5', '#065f46', '1px solid #34d399', "✅ "
                 
-            estilo = {'backgroundColor': color_fondo, 'color': color_texto, 'border': borde, 'padding': '12px', 'borderRadius': '6px'}
-            return texto_salida, estilo
+            estilo = {
+                'backgroundColor': color_fondo, 'color': color_texto, 'border': borde, 
+                'padding': '15px', 'borderRadius': '8px', 'whiteSpace': 'pre-line', 'fontWeight': '600', 'fontSize': '14px'
+            }
+            return f"{icono}{mensaje}", estilo
         else:
-            return "⚠️ API REST disponible pero retornó un error de procesamiento.", {'color': '#d97706'}
+            return "⚠️ La API falló al procesar los datos de regresión del modelo.", {
+                'color': '#b45309', 'backgroundColor': '#fffbeb', 'padding': '12px', 'borderRadius': '8px', 'border': '1px solid #fcd34d'
+            }
             
     except requests.exceptions.ConnectionError:
-        return "🔌 Error de Conexión: La API REST (FastAPI) en el puerto 8000 está apagada. Enciéndela para activar la predicción de Machine Learning.", {'color': '#ef4444', 'backgroundColor': '#fef2f2', 'padding': '10px', 'borderRadius': '6px'}
+        return "🔌 Servicio de Inferencia Inactivo: FastAPI (Puerto 8000) no responde. Enciende tu backend de ML para activar predicciones en vivo.", {
+            'color': '#b91c1c', 'backgroundColor': '#fef2f2', 'padding': '15px', 'borderRadius': '8px', 'border': '1px solid #fca5a5', 'fontWeight': '600'
+        }
 
 if __name__ == "__main__":
     app.run(debug=True, port=8050)
