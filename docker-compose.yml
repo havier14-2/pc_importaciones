@@ -1,0 +1,30 @@
+services:
+  # SERVICIO 1: El Cerebro Predictivo (FastAPI)
+  api_ml:
+    build: .
+    container_name: retail_fx_api
+    # Apuntamos a la carpeta 'api' y al archivo 'main.py'
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=
+      - DB_HOST=host.docker.internal
+      - DB_NAME=retail_fx_db
+
+  # SERVICIO 2: La Fachada Visual (Dash)
+  dashboard:
+    build: .
+    container_name: retail_fx_dashboard
+    # Apuntamos a la carpeta 'dashboards'
+    command: python dashboards/app.py
+    ports:
+      - "8050:8050"
+    environment:
+      - DB_USER=root
+      - DB_PASSWORD=
+      - DB_HOST=host.docker.internal
+      - DB_NAME=retail_fx_db
+    depends_on:
+      - api_ml
