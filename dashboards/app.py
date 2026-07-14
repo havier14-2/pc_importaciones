@@ -191,7 +191,7 @@ def consultar_api_predictiva(producto, valor_dolar):
     }
     
     try:
-        url_api = "http://127.0.0.1:8000/predict/risk"
+        url_api = "http://api_ml:8000/predict/risk"
         respuesta = requests.post(url_api, json=payload, timeout=3)
         
         if respuesta.status_code == 200:
@@ -220,4 +220,4 @@ def consultar_api_predictiva(producto, valor_dolar):
         }
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8050)
+    app.run(host='0.0.0.0', debug=True, port=8050)

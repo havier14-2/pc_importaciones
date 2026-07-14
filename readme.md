@@ -1,96 +1,403 @@
-# 💻 Retail Tech FX: Pipeline ETL & Monitoreo de Riesgo Cambiario
+# 💻 Retail Tech FX
+## Plataforma Inteligente de Monitoreo de Riesgo Cambiario para Importaciones Tecnológicas
 
-Este proyecto es una solución corporativa de Inteligencia de Negocios (BI) diseñada para una cadena de Retail Tecnológico. El sistema automatiza la extracción de datos de inventario, cruza los costos de importación con la cotización diaria en tiempo real del Dólar Observado (USD/CLP) y genera alertas visuales inmediatas cuando las fluctuaciones de la divisa destruyen los márgenes de ganancia mínimos permitidos.
+Retail Tech FX es una plataforma de Inteligencia de Negocios y Machine Learning desarrollada para apoyar la toma de decisiones en empresas importadoras de hardware tecnológico.
 
-## 🏗️ Arquitectura de Datos (3 Fuentes Heterogéneas)
-
-El motor ETL integra tres tipos de orígenes de datos completamente distintos para poblar un Data Warehouse analítico en MySQL:
-
-1. **API REST (Dinámica y Externa):** Conexión directa a https://mindicador.cl/ para extraer la serie de tiempo real con el valor diario del Dólar Observado en Chile.  
-2. **Base de Datos Relacional (Origen ERP Interno):** Tabla en MySQL (`bodegas_tech`) que almacena el stock físico actual y el costo original de importación de fábrica en dólares (USD).  
-3. **Archivo Plano (CSV - Reglas de Negocio):** Archivo estático `reglas_negocio.csv` que define el precio de venta final en pesos chilenos (CLP) y el umbral de margen de ganancia mínimo que la empresa tolera por sucursal.
+La solución automatiza la obtención de información desde múltiples fuentes, procesa los datos mediante un pipeline ETL, entrena un modelo predictivo basado en Machine Learning y expone sus funcionalidades a través de una arquitectura de microservicios utilizando FastAPI, Dash y Docker.
 
 ---
 
-## 🚀 Instalación y Requisitos Iniciales
+# 🚀 Características
 
-### 1. Requisitos del Sistema
+- Extracción automática de datos desde múltiples fuentes.
+- Pipeline ETL completamente automatizado.
+- Limpieza y transformación eficiente mediante Pandas y NumPy.
+- Predicción del costo de importación utilizando Random Forest Regressor.
+- Segmentación exploratoria mediante K-Means.
+- API REST desarrollada con FastAPI.
+- Dashboard interactivo desarrollado con Dash y Plotly.
+- Despliegue mediante Docker Compose.
+- Automatización mediante scripts Batch y PowerShell.
+- Tolerancia a fallos frente a indisponibilidad de servicios externos.
 
-- **Python 3.9 o superior** instalado en el sistema.  
-- **XAMPP** con el módulo de MySQL encendido (ejecutándose en el puerto estándar `3306`).
+---
 
-### 2. Preparación del Entorno
+# 🏗️ Arquitectura del Sistema
 
-Antes de iniciar, abre la terminal en la raíz del proyecto e instala las librerías necesarias con el siguiente comando:
+```
+                  Mindicador.cl API
+                         │
+                         │
+        CSV ─────────► ETL Python ◄──────── MySQL
+                         │
+                         ▼
+                 Dataset Procesado
+                         │
+        ┌────────────────┴────────────────┐
+        │                                 │
+        ▼                                 ▼
+Random Forest Regressor              K-Means
+        │                                 │
+        └──────────────┬──────────────────┘
+                       ▼
+                   FastAPI
+                       │
+                       ▼
+                Dashboard Dash
+                       │
+                       ▼
+                    Usuario
+```
+
+---
+
+# 📁 Estructura del Proyecto
+
+```
+RetailTechFX/
+│
+├── api/                    # API REST FastAPI
+├── dashboard/              # Dashboard Dash
+├── data/
+│   ├── raw/
+│   └── processed/
+├── etl/
+│   ├── setup_mysql.py
+│   └── etl_riesgo_fx.py
+├── models/
+│   ├── train.py
+│   └── modelo_random_forest.pkl
+├── tests/
+├── docker-compose.yml
+├── requirements.txt
+├── automatizacion.bat
+├── lanzar_proyecto.ps1
+└── README.md
+```
+
+---
+
+# ⚙️ Requisitos
+
+Antes de ejecutar el proyecto asegúrate de tener instalado:
+
+- Python 3.9 o superior
+- MySQL (XAMPP o MySQL Server)
+- Docker Desktop
+- Git (opcional)
+
+Verifica además que:
+
+- MySQL esté ejecutándose en el puerto **3306**
+- Docker Desktop esté iniciado
+
+---
+
+# 📦 Instalación
+
+Clona el repositorio:
 
 ```bash
-pip install pandas requests sqlalchemy pymysql dash plotly
+git clone <URL_DEL_REPOSITORIO>
+cd RetailTechFX
 ```
 
----
-
-## 🛠️ Guía de Ejecución y Configuración en Windows
-
-Para simplificar el despliegue inicial, el proyecto cuenta con un entorno preparado para ejecutarse de forma centralizada. Sigue este orden estricto para inicializar y desplegar el sistema en cualquier máquina.
-
-### Paso 1: Inicialización Única con Jupyter Notebook
-
-La forma más rápida de inicializar el entorno por primera vez sin usar comandos manuales es a través del archivo interactivo de presentación.
-
-1. Abre tu editor de código (por ejemplo, VS Code) y carga el archivo `note_etl.ipynb`.  
-2. Asegúrate de tener XAMPP y MySQL activos.  
-3. Ejecuta la **Fase 0** (las primeras celdas del Notebook). Esto ejecutará automáticamente los scripts en segundo plano para:
-   - Crear la base de datos `retail_fx_db` en tu MySQL local.
-   - Poblar las tablas origen con los datos de inventario en USD.
-   - Invocar el pipeline ETL por primera vez para descargar la serie histórica del dólar y rellenar el Data Warehouse.
-
-### Paso 2: Desplegar la Interfaz Visual (Dashboard)
-
-Una vez inicializados los datos a través del Notebook, el sistema está listo para la visualización.
-
-Ejecuta en terminal:
+Instala las dependencias:
 
 ```bash
-python app.py
-```
-
-Luego abre el navegador e ingresa a:
-
-```text
-http://127.0.0.1:8050/
+py -m pip install -r requirements.txt
 ```
 
 ---
 
-## ⚙️ Configuración de la Automatización Diaria en Windows
+# 🗄️ Inicializar la Base de Datos
 
-Para cumplir con el requisito de funcionamiento autónomo sin intervención humana, el proyecto delega la actualización de datos a un script por lotes de Windows (`.bat`) conectado al sistema operativo.
+Inicia MySQL desde XAMPP (o tu servidor MySQL).
 
-### ¿Cómo funciona el archivo `.bat`?
+Luego ejecuta:
 
-El archivo `automatizacion.bat`, ubicado en la raíz del proyecto, es completamente portátil. Utiliza la variable del sistema `%~dp0`, lo que significa que detecta dinámicamente la carpeta en la que se encuentra guardado.
+```bash
+py etl/setup_mysql.py
+```
 
-No requiere configurar rutas manuales fijas en el código; al ejecutarse (ya sea mediante doble clic o por el sistema operativo), resolverá automáticamente los directorios, invocará Python y actualizará MySQL de forma silenciosa.
+Este script creará automáticamente:
 
-### Programación Automática del Sistema (Paso a Paso en Windows)
+- Base de datos `retail_fx_db`
+- Tablas necesarias
+- Datos iniciales
 
-Para ejecutar el pipeline automáticamente todas las mañanas:
+---
 
-1. Presiona **Inicio** → busca **Programador de tareas (Task Scheduler)** → abre la aplicación.  
-2. Haz clic en **Crear tarea básica...**  
-3. Asigna un nombre (ejemplo: `ETL_Actualizacion_Retail_FX`).  
-4. Selecciona **Diariamente** como desencadenador.  
-5. Configura una hora recomendada (ejemplo: **06:00 AM**).  
-6. Selecciona **Iniciar un programa**.  
-7. En **Programa o script**, selecciona el archivo `automatizacion.bat`.  
-8. En **Iniciar en (opcional)**, pega la ruta de la carpeta raíz del proyecto.  
-9. Finaliza el asistente.
+# 🔄 Ejecutar el Pipeline ETL
 
-Desde ese momento, Windows ejecutará automáticamente el script según el horario definido, manteniendo actualizado el Data Warehouse y permitiendo que el Dashboard en Dash refleje alertas críticas de riesgo cambiario en tiempo real.
+Una vez creada la base de datos, ejecuta:
 
+```bash
+py etl/etl_riesgo_fx.py
+```
 
-### EJECUTAR PROYECTO
+El pipeline realiza automáticamente:
 
-1. Abrir xampp y activar MySQL en el puerto 3306
-2. Instalar dependencias: `pip install -r requirements.txt`
-3. Ejecutar: `.\lanzar_proyecto.ps1`
+- Extracción de datos CSV
+- Lectura desde MySQL
+- Consumo de la API Mindicador.cl
+- Limpieza de datos
+- Transformación
+- Ingeniería de características
+- Consolidación del dataset
+
+Si la API gubernamental no responde, el sistema utiliza un valor de contingencia para evitar que el proceso falle.
+
+---
+
+# 🤖 Entrenar el Modelo de Machine Learning
+
+Ejecuta:
+
+```bash
+py models/train.py
+```
+
+Este proceso:
+
+- Entrena el modelo Random Forest Regressor.
+- Evalúa su desempeño.
+- Guarda automáticamente el modelo entrenado (.pkl).
+
+Salida esperada:
+
+```
+Modelo entrenado correctamente.
+Archivo modelo_random_forest.pkl generado.
+```
+
+---
+
+# 🚀 Ejecutar Localmente
+
+## Iniciar la API
+
+```bash
+uvicorn api.main:app --reload
+```
+
+Disponible en:
+
+```
+http://localhost:8000
+```
+
+Documentación Swagger:
+
+```
+http://localhost:8000/docs
+```
+
+---
+
+## Iniciar el Dashboard
+
+En otra terminal:
+
+```bash
+py dashboard/app.py
+```
+
+Disponible en:
+
+```
+http://localhost:8050
+```
+
+---
+
+# 🐳 Despliegue con Docker
+
+Con Docker Desktop abierto, ejecutar:
+
+```bash
+docker compose up --build
+```
+
+Esto levantará automáticamente:
+
+| Servicio | Puerto |
+|----------|---------|
+| FastAPI | 8000 |
+| Dashboard | 8050 |
+
+Accesos:
+
+Dashboard
+
+```
+http://localhost:8050
+```
+
+Swagger
+
+```
+http://localhost:8000/docs
+```
+
+Para detener los servicios:
+
+```bash
+docker compose down
+```
+
+---
+
+# ⚙️ Automatización
+
+El proyecto incorpora dos métodos de automatización.
+
+## Batch
+
+```bash
+automatizacion.bat
+```
+
+Ejecuta automáticamente:
+
+- Pruebas unitarias
+- Pipeline ETL
+- Entrenamiento del modelo
+
+---
+
+## PowerShell
+
+```powershell
+.\lanzar_proyecto.ps1
+```
+
+Este script:
+
+- Inicializa la base de datos
+- Ejecuta el ETL
+- Entrena el modelo
+- Levanta la API
+- Inicia el Dashboard
+
+---
+
+# 📊 Tecnologías Utilizadas
+
+- Python
+- Pandas
+- NumPy
+- Scikit-Learn
+- FastAPI
+- Dash
+- Plotly
+- MySQL
+- Docker
+- Docker Compose
+- Git
+
+---
+
+# 🧪 Pruebas
+
+Para ejecutar las pruebas unitarias:
+
+```bash
+python -m unittest discover tests
+```
+
+---
+
+# 🧰 Troubleshooting
+
+## Error
+
+```
+ConnectionRefusedError
+```
+
+### Causa
+
+MySQL no está iniciado.
+
+### Solución
+
+Abrir XAMPP e iniciar el servicio MySQL.
+
+---
+
+## Error
+
+```
+Unknown database 'retail_fx_db'
+```
+
+### Causa
+
+La base de datos aún no existe.
+
+### Solución
+
+Ejecutar:
+
+```bash
+py etl/setup_mysql.py
+```
+
+---
+
+## Error
+
+```
+ReadTimeout
+```
+
+### Explicación
+
+La API de Mindicador.cl no respondió dentro del tiempo esperado.
+
+No requiere intervención.
+
+El sistema utilizará automáticamente un valor de contingencia para continuar el procesamiento.
+
+---
+
+## Error
+
+```
+Servicio de Inferencia Inactivo
+```
+
+### Causa
+
+El Dashboard no logra comunicarse con la API.
+
+### Solución
+
+- Si trabajas con Docker, verifica que el Dashboard apunte al servicio `api_ml`.
+- Si trabajas localmente, asegúrate de que FastAPI esté ejecutándose antes de abrir el Dashboard.
+
+---
+
+# 📈 Resultado Esperado
+
+Al finalizar correctamente la ejecución:
+
+- Base de datos creada.
+- Dataset consolidado.
+- Modelo entrenado.
+- API REST disponible.
+- Dashboard operativo.
+- Predicciones listas para ser consultadas desde la interfaz web.
+
+---
+
+# 👥 Autores
+
+**Carolina Aguirre**
+
+**Javier Albornoz**
+
+Ingeniería en Informática — Duoc UC
+
+Proyecto desarrollado para la asignatura de Programación para Ciencia de Datos.
